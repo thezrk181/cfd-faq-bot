@@ -11,7 +11,8 @@ const BOT_ID = "31f8fc4e-5c59-43c7-b5fd-61cf7fa46507";
 const CLIENT_ID = "46da5237-8f0b-471a-8997-2ddd0a08de39";
 
 // Direct Botpress-hosted full-screen chat URL (iframe fallback)
-const IFRAME_CHAT_URL = `https://cdn.botpress.cloud/webchat/v3.6/shareable.html?botId=${BOT_ID}&clientId=${CLIENT_ID}`;
+// Try clientId-only format which is the standard Botpress shareable link
+const IFRAME_CHAT_URL = `https://cdn.botpress.cloud/webchat/v3.6/shareable.html?clientId=${CLIENT_ID}`;
 
 function ChatRoute() {
   const [useIframeFallback, setUseIframeFallback] = useState(false);
@@ -19,15 +20,10 @@ function ChatRoute() {
   useEffect(() => {
     document.body.classList.add("full-screen-chat-active");
 
-    // Timeout: if Botpress widget hasn't rendered in 5 seconds, switch to iframe
+    // Switch to iframe after 3s — Botpress widget consistently refuses to embed
     const fallbackTimer = setTimeout(() => {
-      const container = document.getElementById("bp-embedded-webchat");
-      // Check if botpress rendered anything inside our container
-      const hasContent = container && container.children.length > 1; // >1 because our placeholder is child[0]
-      if (!hasContent) {
-        setUseIframeFallback(true);
-      }
-    }, 5000);
+      setUseIframeFallback(true);
+    }, 3000);
 
     let injectScript: HTMLScriptElement | null = null;
 
