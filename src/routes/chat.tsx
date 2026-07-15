@@ -18,7 +18,16 @@ function ChatRoute() {
     injectScript.onload = () => {
       // Force initialization in embedded mode manually
       if (typeof window !== 'undefined' && (window as any).botpress) {
-        (window as any).botpress.init({
+        const bp = (window as any).botpress;
+        
+        bp.on('webchat:initialized', () => {
+          bp.open();
+        });
+        bp.on('webchat:ready', () => {
+          bp.open();
+        });
+
+        bp.init({
           "botId": "31f8fc4e-5c59-43c7-b5fd-61cf7fa46507",
           "clientId": "46da5237-8f0b-471a-8997-2ddd0a08de39",
           "configuration": {
@@ -30,6 +39,11 @@ function ChatRoute() {
           "container": "#bp-embedded-webchat",
           "layout": "embedded"
         });
+
+        // Fallback to force open it after a delay
+        setTimeout(() => {
+          try { bp.open(); } catch(e) {}
+        }, 1000);
       }
     };
     document.body.appendChild(injectScript);
