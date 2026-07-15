@@ -1,15 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Webchat, WebchatProvider, getClient } from "@botpress/webchat";
+import { Webchat, WebchatProvider } from "@botpress/webchat";
 import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/chat")({
   component: ChatRoute,
 });
 
-const client = getClient({
-  clientId: "46da5237-8f0b-471a-8997-2ddd0a08de39",
-});
-
+const CLIENT_ID = "46da5237-8f0b-471a-8997-2ddd0a08de39";
 const HEADER_HEIGHT = 64;
 
 function ChatRoute() {
@@ -77,7 +74,7 @@ function ChatRoute() {
         <div style={{ width: "144px" }} />
       </header>
 
-      {/* Full-screen chat — rendered as a plain React component, no popup/toggle */}
+      {/* Full-screen chat */}
       <div
         style={{
           flex: 1,
@@ -86,7 +83,7 @@ function ChatRoute() {
           overflow: "hidden",
         }}
       >
-        <WebchatProvider client={client}>
+        <WebchatProvider clientId={CLIENT_ID}>
           <Webchat
             style={{
               width: "100%",
