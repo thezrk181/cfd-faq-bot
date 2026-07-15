@@ -10,16 +10,29 @@ function ChatRoute() {
   useEffect(() => {
     document.body.classList.add("full-screen-chat-active");
 
-    // Inject the Botpress scripts on mount
+    // Inject the Botpress script on mount
     const injectScript = document.createElement("script");
     injectScript.src = "https://cdn.botpress.cloud/webchat/v3.6/inject.js";
     injectScript.async = true;
+    
+    injectScript.onload = () => {
+      // Force initialization in embedded mode manually
+      if (typeof window !== 'undefined' && (window as any).botpress) {
+        (window as any).botpress.init({
+          "botId": "31f8fc4e-5c59-43c7-b5fd-61cf7fa46507",
+          "clientId": "46da5237-8f0b-471a-8997-2ddd0a08de39",
+          "configuration": {
+            "botName": "Fast CFD FAQ Bot",
+            "themeMode": "dark",
+            "color": "#3276EA"
+          },
+          "target": "#bp-embedded-webchat",
+          "container": "#bp-embedded-webchat",
+          "layout": "embedded"
+        });
+      }
+    };
     document.body.appendChild(injectScript);
-
-    const configScript = document.createElement("script");
-    configScript.src = "https://files.bpcontent.cloud/2026/07/14/10/20260714101910-9DIHQS5L.js";
-    configScript.async = true;
-    document.body.appendChild(configScript);
 
     return () => {
       document.body.classList.remove("full-screen-chat-active");
@@ -27,9 +40,6 @@ function ChatRoute() {
       // Cleanup scripts on unmount to prevent double rendering if user navigates back and forth
       if (document.body.contains(injectScript)) {
         document.body.removeChild(injectScript);
-      }
-      if (document.body.contains(configScript)) {
-        document.body.removeChild(configScript);
       }
       
       // Remove any botpress injected styles or elements that it adds to head/body
