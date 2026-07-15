@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/chat")({
@@ -9,33 +9,31 @@ export const Route = createFileRoute("/chat")({
 const CLIENT_ID = "46da5237-8f0b-471a-8997-2ddd0a08de39";
 const HEADER_HEIGHT = 64;
 
-// Lazy-load Botpress so it only runs in the browser (never during SSR)
-const BotpressChat = lazy(() =>
-  import("@botpress/webchat").then((mod) => ({
-    default: function BotpressInner() {
-      const { Webchat, WebchatProvider } = mod;
-      return (
-        <WebchatProvider clientId={CLIENT_ID}>
-          <Webchat
-            style={{
-              width: "100%",
-              height: "100%",
-              borderRadius: 0,
-              border: "none",
-              boxShadow: "none",
-            }}
-          />
-        </WebchatProvider>
-      );
-    },
-  }))
-);
-
 function ChatRoute() {
-  const [mounted, setMounted] = useState(false);
+  // null = not loaded, ComponentType = loaded
+  const [BotpressChat, setBotpressChat] = useState<React.ComponentType | null>(null);
 
   useEffect(() => {
-    setMounted(true);
+    // Dynamic import inside useEffect: NEVER runs on the server.
+    // This guarantees @botpress/webchat only loads in the browser.
+    import("@botpress/webchat").then((mod) => {
+      const { Webchat, WebchatProvider } = mod;
+      setBotpressChat(() => function BotpressInner() {
+        return (
+          <WebchatProvider clientId={CLIENT_ID}>
+            <Webchat
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: 0,
+                border: "none",
+                boxShadow: "none",
+              }}
+            />
+          </WebchatProvider>
+        );
+      });
+    });
   }, []);
 
   return (
@@ -109,7 +107,7 @@ function ChatRoute() {
         <div style={{ width: "144px" }} />
       </header>
 
-      {/* Chat area — only rendered client-side to avoid SSR issues */}
+      {/* Chat area */}
       <div
         style={{
           flex: 1,
@@ -120,41 +118,8 @@ function ChatRoute() {
           background: "#070b17",
         }}
       >
-        {mounted ? (
-          <Suspense
-            fallback={
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "1rem",
-                  color: "rgba(255,255,255,0.4)",
-                }}
-              >
-                <img
-                  src="/logo.jpg"
-                  alt="Loading"
-                  className="animate-pulse"
-                  style={{
-                    width: "64px",
-                    height: "64px",
-                    borderRadius: "50%",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    objectFit: "cover",
-                  }}
-                />
-                <p style={{ fontSize: "0.875rem", letterSpacing: "0.05em" }}>
-                  Initializing CFD Assistant...
-                </p>
-              </div>
-            }
-          >
-            <BotpressChat />
-          </Suspense>
+        {BotpressChat ? (
+          <BotpressChat />
         ) : (
           <div
             style={{
