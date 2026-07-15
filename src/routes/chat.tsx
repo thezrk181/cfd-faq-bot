@@ -33,7 +33,8 @@ function ChatRoute() {
           "configuration": {
             "botName": "Fast CFD FAQ Bot",
             "themeMode": "dark",
-            "color": "#3276EA"
+            "color": "#3276EA",
+            "stylesheet": `${window.location.origin}/botpress-override.css`
           },
           "target": "#bp-embedded-webchat",
           "container": "#bp-embedded-webchat",
